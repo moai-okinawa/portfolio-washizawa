@@ -1,0 +1,80 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+
+const DESCRIPTION = 'お探しのページは見つかりませんでした。';
+---
+
+<!doctype html>
+<html lang="ja">
+	<head>
+		<BaseHead title={`404 Not Found — ${SITE_TITLE}`} description={DESCRIPTION} />
+	</head>
+	<body>
+		<Header />
+		<main id="main-content">
+			<header class="page-head">
+				<p class="eyebrow rise-in" style="--delay: 0.05s">Not found</p>
+				<h1 class="display">
+					<span class="mask-line"><span style="--delay: 0.18s">404</span></span>
+				</h1>
+				<p class="lead rise-in" style="--delay: 0.42s">
+					お探しのページは見つかりませんでした。<br />
+					URL が変更されたか、削除された可能性があります。
+				</p>
+			</header>
+
+			<nav class="actions rise-in" style="--delay: 0.55s" aria-label="主要ページへの導線">
+				<a class="link-more" href="/">
+					<span class="label">Back to home</span>
+					<span class="arrow">→</span>
+				</a>
+				<a class="link-more sub" href="/projects">
+					<span class="label">Projects</span>
+					<span class="arrow">→</span>
+				</a>
+				<a class="link-more sub" href="/blog">
+					<span class="label">Blog</span>
+					<span class="arrow">→</span>
+				</a>
+			</nav>
+		</main>
+		<Footer />
+	</body>
+</html>
+
+<style>
+	main {
+		width: var(--container);
+		max-width: calc(100% - 2.5em);
+		margin: 0 auto;
+		padding: 0 0 6rem;
+	}
+	.page-head {
+		padding-bottom: 3rem;
+	}
+	.page-head .display {
+		margin-top: 1.25rem;
+	}
+	.lead {
+		margin: 1.75rem 0 0;
+		max-width: 34em;
+		color: var(--muted-foreground);
+		font-size: 0.97rem;
+		line-height: 2;
+	}
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 2.5rem;
+	}
+	.link-more.sub {
+		color: var(--muted-foreground);
+	}
+	.link-more.sub:hover,
+	.link-more.sub:focus-visible {
+		color: var(--primary);
+	}
+</style>

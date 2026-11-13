@@ -1,0 +1,159 @@
+---
+// Light/Dark theme toggle. The no-flash class is applied in BaseHead.astro.
+//
+// The sun and the moon sit on opposite ends of one orbit whose pivot is directly
+// below the button. Each toggle turns that orbit 180deg clockwise, so the visible
+// body arcs off to the lower right while the other climbs in from the lower left
+// — the button edge reads as the horizon they cross. Both land upright because
+// the sun's 180deg base plus a half turn adds up to a full turn. Anything outside
+// the button is clipped by `overflow: hidden`.
+//
+// The button shows the theme it switches TO: moon while light, sun while dark.
+---
+
+<button id="theme-toggle" type="button" aria-label="Toggle theme">
+	<span class="orbit" aria-hidden="true">
+		<span class="dial">
+			<span class="body sun">
+				<svg
+					viewBox="0 0 24 24"
+					width="20"
+					height="20"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="1.8"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<circle cx="12" cy="12" r="4"></circle>
+					<path d="M12 2v2"></path>
+					<path d="M12 20v2"></path>
+					<path d="m4.93 4.93 1.41 1.41"></path>
+					<path d="m17.66 17.66 1.41 1.41"></path>
+					<path d="M2 12h2"></path>
+					<path d="M20 12h2"></path>
+					<path d="m6.34 17.66-1.41 1.41"></path>
+					<path d="m19.07 4.93-1.41 1.41"></path>
+				</svg>
+			</span>
+			<span class="body moon">
+				<svg
+					viewBox="0 0 24 24"
+					width="20"
+					height="20"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="1.8"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+				</svg>
+			</span>
+		</span>
+	</span>
+</button>
+
+<style>
+	#theme-toggle {
+		/* Orbit radius. The resting body sits at the centre and its partner 2x
+		   this distance straight below — just clear of the 36px box, so the
+		   setting body is still dipping as the rising one breaks the horizon. */
+		--r: 18px;
+		--turn: 0deg;
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		padding: 0;
+		border: 1px solid var(--border);
+		background: transparent;
+		color: var(--foreground);
+		border-radius: var(--radius);
+		overflow: hidden;
+		cursor: pointer;
+		transition:
+			background 0.15s ease,
+			border-color 0.15s ease,
+			color 0.15s ease;
+	}
+	:global(html.dark) #theme-toggle {
+		--turn: 180deg;
+	}
+	#theme-toggle:hover {
+		background: var(--muted);
+		border-color: var(--ring);
+	}
+
+	/* pivot: straight below the button centre, so a clockwise turn carries the
+	   visible body down to the right and brings its partner up from the left */
+	.orbit {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		width: 0;
+		height: 0;
+		transform: translateY(var(--r));
+	}
+	.dial {
+		position: absolute;
+		left: 0;
+		top: 0;
+		width: 0;
+		height: 0;
+		transform: rotate(var(--turn));
+		transition: transform 0.62s cubic-bezier(0.66, 0, 0.24, 1);
+	}
+	.body {
+		position: absolute;
+		left: 0;
+		top: 0;
+		display: block;
+		width: 20px;
+		height: 20px;
+		margin: -10px 0 0 -10px;
+		transform: rotate(var(--base, 0deg)) translateY(calc(var(--r) * -1));
+	}
+	.sun {
+		--base: 180deg;
+	}
+	.body svg {
+		display: block;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.dial {
+			transition: none;
+		}
+	}
+</style>
+
+<script>
+	const btn = document.getElementById('theme-toggle');
+	const root = document.documentElement;
+	// keep turning in one direction so the motion always reads clockwise
+	let turn = root.classList.contains('dark') ? 180 : 0;
+
+	// tell assistive tech what pressing the button will do (the static
+	// "Toggle theme" label stays as the no-JS fallback in the markup)
+	const setLabel = () => {
+		btn?.setAttribute(
+			'aria-label',
+			root.classList.contains('dark') ? 'Switch to light theme' : 'Switch to dark theme',
+		);
+	};
+	setLabel();
+
+	btn?.addEventListener('click', () => {
+		const next = root.classList.contains('dark') ? 'light' : 'dark';
+		turn += 180;
+		btn.style.setProperty('--turn', `${turn}deg`);
+		root.classList.toggle('dark', next === 'dark');
+		setLabel();
+		try {
+			localStorage.setItem('theme', next);
+		} catch {}
+	});
+</script>

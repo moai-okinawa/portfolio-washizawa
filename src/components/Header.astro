@@ -1,0 +1,212 @@
+---
+import HeaderLink from './HeaderLink.astro';
+import ThemeToggle from './ThemeToggle.astro';
+---
+
+<a class="skip-link" href="#main-content">Skip to content</a>
+<header>
+	<div class="inner">
+		<a class="brand" href="/">WASSY<span class="brand-dot">.</span></a>
+		<nav id="primary-nav" class="primary-nav">
+			<HeaderLink href="/">Home</HeaderLink>
+			<HeaderLink href="/about">About</HeaderLink>
+			<HeaderLink href="/projects">Projects</HeaderLink>
+			<HeaderLink href="/blog">Blog</HeaderLink>
+			<HeaderLink href="/contact">Contact</HeaderLink>
+		</nav>
+		<div class="actions">
+			<ThemeToggle />
+			<button
+				id="nav-toggle"
+				class="nav-toggle"
+				type="button"
+				aria-label="Open menu"
+				aria-controls="primary-nav"
+				aria-expanded="false"
+			>
+				<svg
+					class="icon-open"
+					viewBox="0 0 24 24"
+					width="20"
+					height="20"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="1.8"
+					stroke-linecap="round"
+					aria-hidden="true"
+				>
+					<path d="M4 7h16"></path>
+					<path d="M4 12h16"></path>
+					<path d="M4 17h16"></path>
+				</svg>
+				<svg
+					class="icon-close"
+					viewBox="0 0 24 24"
+					width="20"
+					height="20"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="1.8"
+					stroke-linecap="round"
+					aria-hidden="true"
+				>
+					<path d="M6 6l12 12"></path>
+					<path d="M18 6L6 18"></path>
+				</svg>
+			</button>
+		</div>
+	</div>
+</header>
+
+<style>
+	header {
+		position: sticky;
+		top: 0;
+		z-index: 50;
+		background: color-mix(in oklch, var(--background) 82%, transparent);
+		backdrop-filter: saturate(180%) blur(12px);
+		border-bottom: 1px solid transparent;
+		transition: border-color 0.3s ease;
+	}
+	header.scrolled {
+		border-bottom-color: var(--border);
+	}
+	.inner {
+		max-width: var(--container-wide);
+		margin: 0 auto;
+		padding: 1.1em 1.25em;
+		display: flex;
+		align-items: center;
+		gap: 1.25rem;
+	}
+	.brand {
+		font-family: var(--font-mono);
+		font-weight: 700;
+		font-size: 0.9rem;
+		color: var(--foreground);
+		letter-spacing: 0.22em;
+	}
+	.brand-dot {
+		color: var(--primary);
+	}
+	nav {
+		display: flex;
+		gap: 1.5rem;
+		flex: 1;
+		justify-content: flex-end;
+		margin-right: 0.75rem;
+	}
+	.actions {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+	}
+	.nav-toggle {
+		display: none;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		padding: 0;
+		border: 1px solid var(--border);
+		background: transparent;
+		color: var(--foreground);
+		border-radius: var(--radius);
+		cursor: pointer;
+		transition:
+			background 0.15s ease,
+			border-color 0.15s ease,
+			color 0.15s ease;
+	}
+	.nav-toggle:hover {
+		background: var(--muted);
+		border-color: var(--ring);
+	}
+	.nav-toggle .icon-close {
+		display: none;
+	}
+	.nav-toggle[aria-expanded='true'] .icon-open {
+		display: none;
+	}
+	.nav-toggle[aria-expanded='true'] .icon-close {
+		display: block;
+	}
+	@media (max-width: 720px) {
+		.nav-toggle {
+			display: inline-flex;
+		}
+		.brand {
+			margin-right: auto;
+		}
+		.primary-nav {
+			display: none;
+			position: absolute;
+			top: 100%;
+			left: 0;
+			right: 0;
+			flex-direction: column;
+			gap: 0;
+			padding: 0.5rem 1em 0.75rem;
+			background: color-mix(in oklch, var(--background) 96%, transparent);
+			backdrop-filter: saturate(180%) blur(10px);
+			border-bottom: 1px solid var(--border);
+		}
+		.primary-nav.open {
+			display: flex;
+		}
+		.primary-nav :global(a) {
+			display: block;
+			padding: 0.7em 0.6em;
+			font-size: 1rem;
+		}
+	}
+</style>
+
+<script>
+	const btn = document.getElementById('nav-toggle');
+	const nav = document.getElementById('primary-nav');
+
+	const setOpen = (open: boolean) => {
+		nav?.classList.toggle('open', open);
+		btn?.setAttribute('aria-expanded', open ? 'true' : 'false');
+		btn?.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+	};
+
+	btn?.addEventListener('click', (e) => {
+		e.stopPropagation();
+		setOpen(!nav?.classList.contains('open'));
+	});
+
+	// Close when a nav link is tapped (so navigation feels snappy).
+	nav?.addEventListener('click', (e) => {
+		if ((e.target as HTMLElement).closest('a')) setOpen(false);
+	});
+
+	// Close on Escape, handing focus back to the toggle so it isn't lost.
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape' && nav?.classList.contains('open')) {
+			setOpen(false);
+			btn?.focus();
+		}
+	});
+
+	// Close when tapping outside the panel.
+	document.addEventListener('click', (e) => {
+		if (!nav?.classList.contains('open')) return;
+		const target = e.target as Node;
+		if (nav.contains(target) || btn?.contains(target)) return;
+		setOpen(false);
+	});
+
+	// Auto-close if the viewport grows past the mobile breakpoint.
+	const mq = window.matchMedia('(min-width: 721px)');
+	mq.addEventListener('change', (e) => {
+		if (e.matches) setOpen(false);
+	});
+
+	// Hairline border appears once the page is scrolled.
+	const header = document.querySelector('header');
+	const onScroll = () => header?.classList.toggle('scrolled', window.scrollY > 8);
+	onScroll();
+	document.addEventListener('scroll', onScroll, { passive: true });
+</script>

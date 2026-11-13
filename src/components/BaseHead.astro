@@ -1,0 +1,137 @@
+---
+import '../styles/global.css';
+import { Font } from 'astro:assets';
+import { GA_MEASUREMENT_ID, SITE_TITLE, SITE_URL } from '../consts';
+
+interface Props {
+	title: string;
+	description: string;
+	image?: string;
+	type?: 'website' | 'article';
+}
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const { title, description, image = '/og.png', type = 'website' } = Astro.props;
+const basePath = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/`;
+const imageURL = new URL(`${basePath}${image.replace(/^\//, '')}`, Astro.site);
+const gaHost = new URL(SITE_URL).hostname;
+---
+
+{/* Theme: apply class before paint to avoid flash */}
+<script is:inline>
+	(() => {
+		document.documentElement.classList.add('js');
+		try {
+			const stored = localStorage.getItem('theme');
+			const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+			const theme = stored ?? (prefersDark ? 'dark' : 'light');
+			if (theme === 'dark') document.documentElement.classList.add('dark');
+		} catch {}
+	})();
+</script>
+
+{/* Scroll reveal for [data-reveal] / [data-reveal-stagger] elements */}
+<script>
+	// Cancel the CSS-only fallback (global.css) now that the observer is live.
+	document.documentElement.classList.add('reveal-ready');
+
+	const targets = document.querySelectorAll('[data-reveal], [data-reveal-stagger]');
+
+	// Children of a stagger group each get an index, which global.css turns
+	// into a transition-delay so they cascade instead of arriving together.
+	document.querySelectorAll('[data-reveal-stagger]').forEach((group) => {
+		Array.from(group.children).forEach((child, i) => {
+			(child as HTMLElement).style.setProperty('--i', String(i));
+		});
+	});
+
+	if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+		targets.forEach((el) => el.classList.add('is-visible'));
+	} else {
+		const observer = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					if (entry.isIntersecting) {
+						entry.target.classList.add('is-visible');
+						observer.unobserve(entry.target);
+					}
+				}
+			},
+			{ threshold: 0.15, rootMargin: '0px 0px -5% 0px' },
+		);
+		targets.forEach((el) => observer.observe(el));
+	}
+</script>
+
+{/* Global Metadata */}
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+{/* iOS Safari の data detectors 対策。電話番号のほか、住所（「群馬県」など）や日付が
+	     勝手にリンク化されるのを止める（About の Profile が丸ごとリンクになる問題） */}
+<meta
+	name="format-detection"
+	content="telephone=no, date=no, address=no, email=no"
+/>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+<link
+	rel="alternate"
+	type="application/rss+xml"
+	title={SITE_TITLE}
+	href={new URL(`${basePath}rss.xml`, Astro.site)}
+/>
+<meta name="generator" content={Astro.generator} />
+
+{/*
+	Preload only the latin subsets of the Latin fonts (Geist for body, Geist Mono for
+	header nav / .eyebrow / .link-more). Noto Sans JP ships ~120 unicode-range subsets
+	per weight, so it is NOT preloaded: the browser fetches only the subsets a page uses.
+*/}
+<Font cssVariable="--font-geist" preload={[{ subset: 'latin' }]} />
+<Font cssVariable="--font-geist-mono" preload={[{ subset: 'latin' }]} />
+<Font cssVariable="--font-noto-jp" />
+
+{/* Canonical URL */}
+<link rel="canonical" href={canonicalURL} />
+
+{/* Primary Meta Tags */}
+<title>{title}</title>
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+
+{/* Open Graph / Facebook */}
+<meta property="og:type" content={type} />
+<meta property="og:url" content={Astro.url} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={imageURL} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+
+{/* Twitter */}
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={Astro.url} />
+<meta property="twitter:title" content={title} />
+<meta property="twitter:description" content={description} />
+<meta property="twitter:image" content={imageURL} />
+
+<meta name="theme-color" content="#F7F8FA" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0F1A1D" media="(prefers-color-scheme: dark)" />
+
+{/* Google Analytics 4 — only load on the production host, skipping localhost and preview deploys */}
+<script is:inline define:vars={{ gaId: GA_MEASUREMENT_ID, gaHost }}>
+	if (location.hostname === gaHost) {
+		window.dataLayer = window.dataLayer || [];
+		window.gtag = function () {
+			dataLayer.push(arguments);
+		};
+		gtag('js', new Date());
+		gtag('config', gaId);
+		const s = document.createElement('script');
+		s.async = true;
+		s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+		document.head.appendChild(s);
+	}
+</script>

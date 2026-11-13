@@ -1,0 +1,207 @@
+---
+/**
+ * Opening for Home: a large eagle (鷲) silhouette sweeps across the viewport
+ * and the page is uncovered in its wake. Plays once per tab session and never
+ * under `prefers-reduced-motion: reduce`. Without JS nothing is shown.
+ *
+ * One custom property, --sweep (0 → 1), drives both the eagle's position and
+ * the edge of the curtain, so the reveal stays tucked under the wings.
+ *
+ * Text inside a `[data-eagle-reveal]` container is split into characters, and
+ * each one fades in at the moment the wake passes over it (left → right).
+ *
+ * The sweep waits (behind the curtain) for web fonts, so nothing is revealed in
+ * a fallback face and the letters are measured in their final positions.
+ */
+---
+
+<script is:inline>
+	try {
+		if (
+			!matchMedia('(prefers-reduced-motion: reduce)').matches &&
+			!sessionStorage.getItem('eagle-intro')
+		) {
+			sessionStorage.setItem('eagle-intro', '1');
+			const root = document.documentElement;
+			root.setAttribute('data-intro', '');
+			// failsafe: never leave the curtain up if the script below doesn't run
+			setTimeout(() => root.setAttribute('data-intro-go', ''), 2500);
+		}
+	} catch {}
+</script>
+
+<div class="eagle-intro" aria-hidden="true">
+	<div class="curtain"></div>
+	<svg class="eagle" viewBox="0 0 759 1000" preserveAspectRatio="xMidYMid meet">
+		<path
+			d="M676 1000 679 1000 679 997 678 996 678 992 676 987 676 984 675 983 675 979 674 978 674 974 673 973 673 969 672 969 672 964 671 963 671 959 670 958 670 954 669 953 669 949 668 948 668 943 667 942 666 933 665 932 665 926 664 925 664 921 664 920 662 901 663 901 664 905 667 914 669 917 669 919 671 922 671 923 675 931 675 933 678 938 678 939 691 965 697 974 709 986 716 990 720 991 721 987 720 986 720 983 719 982 718 975 716 971 715 965 714 964 713 958 711 952 711 949 710 948 709 942 706 936 706 933 704 929 703 923 704 923 708 929 718 939 731 948 736 951 742 952 743 953 745 953 745 951 741 940 741 938 739 936 739 934 736 929 736 927 732 921 732 919 727 910 727 908 721 896 721 894 712 878 712 876 704 859 704 859 710 864 710 865 727 883 728 883 735 890 746 895 756 896 759 894 756 886 754 884 746 870 733 850 730 847 727 841 711 820 711 820 714 821 725 831 737 837 743 838 744 839 751 839 752 838 755 838 756 837 671 753 670 753 664 747 664 746 659 741 658 738 650 727 647 723 643 718 625 699 624 699 618 694 607 685 593 676 578 668 577 666 570 664 568 662 563 660 556 654 498 594 498 594 480 575 480 574 475 568 475 567 464 555 463 553 465 552 467 552 485 542 487 540 498 535 506 528 508 528 511 526 513 526 516 524 519 524 520 523 524 524 526 527 526 518 524 514 519 508 513 504 511 504 508 500 500 492 486 484 484 484 481 482 478 482 474 480 468 479 467 478 463 478 462 477 458 477 457 477 453 477 453 476 449 476 448 475 443 475 442 474 429 472 428 471 422 470 421 469 410 466 405 463 391 449 385 440 384 438 383 436 382 433 380 431 377 424 375 422 358 389 358 387 353 378 353 376 350 370 350 368 341 350 341 348 339 345 339 344 337 341 337 339 336 336 336 334 330 322 329 317 327 314 326 310 324 307 321 297 320 294 320 292 316 282 316 280 312 270 312 267 311 266 311 264 310 263 309 255 308 254 307 250 301 236 299 234 298 232 294 227 293 224 288 216 265 186 259 177 258 174 257 172 244 149 244 147 239 137 239 135 233 125 233 123 218 93 216 91 213 84 211 82 205 70 189 47 186 47 183 51 183 54 182 55 182 66 183 67 183 71 184 72 186 79 189 84 189 86 193 92 195 98 203 109 203 112 202 111 194 103 194 102 188 96 188 95 183 91 183 90 168 72 163 63 159 60 136 30 134 26 126 16 124 12 115 0 113 3 112 13 113 14 113 19 115 23 115 26 117 29 118 35 131 58 134 62 135 65 145 79 153 91 153 91 149 88 129 69 128 69 60 0 59 0 55 3 55 8 54 9 55 17 58 26 69 40 90 61 91 61 112 80 110 81 109 80 108 80 87 69 73 59 70 56 63 53 57 47 37 34 34 31 25 25 23 25 22 27 22 39 24 47 31 56 50 74 62 83 82 96 91 103 88 103 87 102 81 102 68 95 66 95 47 85 45 85 40 82 38 82 35 80 33 80 24 76 16 75 16 74 1 74 0 76 0 79 1 80 2 85 6 91 11 96 15 98 15 101 13 106 13 122 16 129 20 134 20 149 21 150 21 157 22 158 22 162 23 163 23 169 25 172 29 176 29 188 30 188 30 196 31 197 31 200 34 205 38 209 36 214 36 228 37 229 38 234 42 242 41 247 40 248 40 261 42 266 47 270 47 274 46 275 46 284 45 285 46 287 46 294 50 300 54 303 54 305 51 311 51 319 54 325 60 331 59 333 59 341 60 342 60 353 61 354 62 361 66 368 70 371 70 372 70 380 70 381 70 384 73 391 77 397 82 402 86 404 86 411 87 412 88 417 93 424 98 428 98 431 99 432 100 437 102 439 110 447 110 455 111 456 111 458 117 467 124 473 124 480 126 484 129 488 139 493 139 500 143 505 148 508 154 508 158 515 156 515 156 514 152 514 151 513 147 513 146 512 141 512 141 511 137 511 136 510 132 510 131 509 127 509 126 508 123 508 122 508 117 508 116 507 112 507 111 506 108 506 107 505 103 505 102 504 98 504 97 503 93 503 92 502 88 502 87 501 83 501 82 500 78 500 78 499 73 499 72 498 68 498 67 497 63 497 62 496 59 496 58 495 53 495 52 494 48 494 47 493 44 493 43 492 38 492 37 492 33 492 32 491 30 491 27 493 27 501 28 502 30 512 34 519 31 522 29 522 25 523 21 528 21 531 20 531 21 533 22 542 26 553 16 558 10 562 8 567 8 575 8 576 8 578 13 588 17 593 13 596 10 602 10 611 14 618 19 624 11 635 11 637 10 638 10 644 12 648 20 656 27 661 27 663 30 669 34 672 34 673 38 677 43 679 47 679 48 680 58 679 59 678 62 678 63 677 65 677 65 682 63 686 61 688 46 695 43 697 43 703 51 712 56 714 57 716 57 719 58 721 63 727 72 730 79 730 86 741 90 745 94 747 105 747 106 746 110 746 111 745 114 745 115 744 120 743 121 755 122 756 123 761 126 766 130 771 134 773 136 773 137 773 144 773 145 773 148 773 149 772 154 771 158 768 162 773 170 776 179 776 180 775 198 775 202 777 203 780 218 793 223 796 231 796 233 794 237 786 237 784 239 781 242 769 244 766 247 756 249 753 249 751 250 750 250 749 251 748 251 746 252 745 252 743 253 742 253 740 254 739 254 737 255 736 255 734 256 734 256 732 257 731 257 729 258 728 258 726 258 725 258 723 259 722 259 720 260 719 260 718 261 717 261 715 269 694 269 691 272 685 273 679 274 679 274 682 279 694 285 701 287 701 289 703 289 712 291 719 296 723 302 725 302 733 305 740 309 745 315 749 319 750 319 752 318 753 319 760 322 766 327 770 333 771 335 781 336 784 339 787 344 788 346 790 359 802 364 805 369 805 371 814 379 823 388 829 391 831 393 831 396 833 398 833 408 843 418 850 430 855 436 855 438 860 446 865 448 865 451 867 453 867 459 869 467 870 468 875 471 878 476 883 481 884 484 884 484 885 494 885 495 884 498 884 506 894 512 898 528 905 537 914 542 915 545 915 546 916 561 916 562 917 573 929 578 932 591 938 596 938 599 942 610 953 627 961 630 961 631 962 638 962 647 975 660 990 672 998 676 1000Z"
+		></path>
+	</svg>
+</div>
+
+<style>
+	@property --sweep {
+		syntax: '<number>';
+		inherits: true;
+		initial-value: 0;
+	}
+
+	.eagle-intro {
+		display: none;
+	}
+	:global(html[data-intro]) .eagle-intro {
+		/* a bit taller than the viewport so the wingtips clip, capped on narrow
+		   screens so the whole bird still fits across */
+		--h: min(115vh, 140vw);
+		--w: calc(var(--h) * 759 / 1000);
+		/* start an extra 0.2w off-screen (the tilt swings a wingtip back into view)
+		   and travel far enough that the soft edge clears the right side too */
+		--x: calc(var(--sweep) * (114vw + var(--w) * 1.2) - var(--w) * 1.2);
+		display: block;
+		position: fixed;
+		inset: 0;
+		z-index: 200;
+		pointer-events: none;
+		overflow: hidden;
+		animation: eagle-sweep 1.4s cubic-bezier(0.4, 0.05, 0.3, 1) 0.1s forwards;
+		animation-play-state: paused;
+	}
+	:global(html[data-intro-go]) .eagle-intro {
+		animation-play-state: running;
+	}
+
+	.curtain {
+		position: absolute;
+		inset: 0;
+		background: var(--background);
+		/* soft edge trailing the wings, like a wake */
+		--edge: calc(var(--x) + var(--w) * 0.4);
+		mask-image: linear-gradient(
+			90deg,
+			transparent calc(var(--edge) - 14vw),
+			#000 var(--edge)
+		);
+	}
+
+	.eagle {
+		position: absolute;
+		top: 50%;
+		left: 0;
+		width: var(--w);
+		height: var(--h);
+		fill: var(--foreground);
+		transform: translate(var(--x), calc(-50% + (0.5 - var(--sweep)) * 18vh)) rotate(-6deg);
+	}
+
+	/* Characters created by the script below; each gets its own animation-delay */
+	/* stays inline so kerning and Japanese line breaking are untouched */
+	:global(.eagle-char) {
+		animation: eagle-char-in 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+	}
+	@keyframes eagle-char-in {
+		from {
+			opacity: 0;
+			filter: blur(6px);
+		}
+		to {
+			opacity: 1;
+			filter: none;
+		}
+	}
+	@keyframes eagle-sweep {
+		from {
+			--sweep: 0;
+		}
+		99% {
+			visibility: visible;
+		}
+		to {
+			--sweep: 1;
+			visibility: hidden;
+		}
+	}
+</style>
+
+<script>
+	const intro = document.documentElement.hasAttribute('data-intro')
+		? document.querySelector<HTMLElement>('.eagle-intro')
+		: null;
+	const eagle = intro?.querySelector<SVGElement>('.eagle');
+	const sweep = intro?.getAnimations()[0];
+
+	if (intro && eagle && sweep) {
+		// fonts first (capped so a slow network doesn't hold the page hostage)
+		Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1200))]).then(() => {
+			try {
+				reveal(eagle, sweep);
+			} finally {
+				document.documentElement.setAttribute('data-intro-go', '');
+			}
+		});
+	}
+
+	function reveal(eagle: SVGElement, sweep: Animation) {
+		const { delay = 0, duration = 0, easing = '' } = sweep.effect?.getComputedTiming() ?? {};
+		const [x1, y1, x2, y2] = easing.startsWith('cubic-bezier')
+			? (easing.match(/-?[\d.]+/g) ?? []).map(Number)
+			: [0, 0, 1, 1];
+		const bezier = (a: number, b: number, t: number) =>
+			3 * a * (1 - t) ** 2 * t + 3 * b * (1 - t) * t * t + t ** 3;
+		// time fraction at which the eased sweep reaches progress p
+		const timeAt = (p: number) => {
+			let lo = 0;
+			let hi = 1;
+			for (let i = 0; i < 24; i++) {
+				const mid = (lo + hi) / 2;
+				if (bezier(y1, y2, mid) < p) lo = mid;
+				else hi = mid;
+			}
+			return bezier(x1, x2, lo);
+		};
+
+		// Same geometry as the CSS: x = sweep * (114vw + 1.2w) - 1.2w. A letter starts
+		// when the eagle's body (x + 0.5w) is over it, so it emerges from under the wings
+		const vw = window.innerWidth / 100;
+		const w = parseFloat(getComputedStyle(eagle).width);
+		const travel = 114 * vw + 1.2 * w;
+		const sweepAt = (cx: number) => Math.min(Math.max((cx + 0.7 * w) / travel, 0), 1);
+
+		const chars: HTMLElement[] = [];
+		for (const root of document.querySelectorAll<HTMLElement>('[data-eagle-reveal]')) {
+			const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+			const nodes: Text[] = [];
+			while (walker.nextNode()) {
+				const node = walker.currentNode as Text;
+				if (node.data.trim()) nodes.push(node);
+			}
+			for (const node of nodes) {
+				// screen readers get the plain text, the animated letters are decorative
+				const label = document.createElement('span');
+				label.className = 'sr-only';
+				label.textContent = node.data;
+				const visual = document.createElement('span');
+				visual.setAttribute('aria-hidden', 'true');
+				for (const ch of node.data.replace(/\s+/g, ' ')) {
+					if (ch === ' ') {
+						visual.append(' ');
+						continue;
+					}
+					const span = document.createElement('span');
+					span.className = 'eagle-char';
+					span.textContent = ch;
+					visual.append(span);
+					chars.push(span);
+				}
+				node.replaceWith(label, visual);
+			}
+			root.setAttribute('data-eagle-split', '');
+		}
+
+		const elapsed = Number(sweep.currentTime ?? 0);
+		for (const span of chars) {
+			const r = span.getBoundingClientRect();
+			const at = delay + duration * timeAt(sweepAt(r.left + r.width / 2));
+			span.style.animationDelay = `${at - elapsed}ms`;
+		}
+	}
+</script>

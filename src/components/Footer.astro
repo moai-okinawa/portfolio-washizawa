@@ -1,0 +1,67 @@
+---
+import { AUTHOR_NAME, GITHUB_URL } from '../consts';
+const today = new Date();
+---
+
+<footer>
+	<div class="inner">
+		<div class="bottom">
+			<span class="copy">&copy; {today.getFullYear()} {AUTHOR_NAME}</span>
+			<div class="links">
+				<a href="/contact">Contact</a>
+				<a href={GITHUB_URL} target="_blank" rel="noopener"
+					>GitHub<span class="sr-only">（新しいタブで開きます）</span></a
+				>
+				<a href="/rss.xml" title="RSS フィード" aria-label="RSS フィード（ブログの更新情報）"
+					>RSS</a
+				>
+			</div>
+		</div>
+	</div>
+</footer>
+<style>
+	footer {
+		border-top: 1px solid var(--border);
+		background: var(--background);
+		color: var(--muted-foreground);
+	}
+	.inner {
+		max-width: var(--container-wide);
+		margin: 0 auto;
+		padding: 2em 1.25em;
+	}
+	.links a {
+		font-family: var(--font-mono);
+		font-size: 0.72rem;
+		font-weight: 500;
+		letter-spacing: 0.22em;
+		text-transform: uppercase;
+		color: var(--muted-foreground);
+		transition: color 0.2s ease;
+	}
+	.links a:hover,
+	.links a:focus-visible {
+		color: var(--primary);
+	}
+	.bottom {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 1rem;
+	}
+	.copy {
+		font-size: 0.8rem;
+		letter-spacing: 0.04em;
+	}
+	.links {
+		display: flex;
+		align-items: center;
+		gap: 1.5rem;
+	}
+	@media (max-width: 720px) {
+		.bottom {
+			flex-direction: column-reverse;
+			align-items: flex-start;
+		}
+	}
+</style>
